@@ -1,0 +1,64 @@
+diff --git a/jsonapi_extras/jsonapi_extras.services.yml b/jsonapi_extras/jsonapi_extras.services.yml
+index 0447bb1..0090c72 100644
+--- a/jsonapi_extras/jsonapi_extras.services.yml
++++ b/jsonapi_extras/jsonapi_extras.services.yml
+@@ -57,6 +57,7 @@ services:
+       - '@jsonapi.resource_type.repository'
+       - '@session'
+       - '@request_stack'
++      - '%jsonapi_obscurity.prefix%'
+
+   jsonapi_extras.jsonapi_build_subscriber:
+     class: Drupal\jsonapi_extras\EventSubscriber\JsonApiBuildSubscriber
+diff --git a/jsonapi_extras/src/EntityToJsonApi.php b/jsonapi_extras/src/EntityToJsonApi.php
+index c6e1c97..e4f83b8 100644
+--- a/jsonapi_extras/src/EntityToJsonApi.php
++++ b/jsonapi_extras/src/EntityToJsonApi.php
+@@ -47,6 +47,13 @@ class EntityToJsonApi {
+    */
+   protected $currentRequest;
+
++  /**
++   * The JSON:API obscurity prefix.
++   *
++   * @var string
++   */
++  protected string $obscurityPrefix;
++
+   /**
+    * EntityToJsonApi constructor.
+    *
+@@ -58,12 +65,15 @@ class EntityToJsonApi {
+    *   The session object.
+    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+    *   The stack of requests.
++   * @param string $obscurity_prefix
++   *   The JSON:API obscurity prefix.
+    */
+   public function __construct(
+     HttpKernelInterface $http_kernel,
+     ResourceTypeRepositoryInterface $resource_type_repository,
+     SessionInterface $session,
+-    RequestStack $request_stack
++    RequestStack $request_stack,
++    string $obscurity_prefix
+   ) {
+     $this->httpKernel = $http_kernel;
+     $this->resourceTypeRepository = $resource_type_repository;
+@@ -71,6 +81,7 @@ public function __construct(
+     $this->session = $this->currentRequest->hasPreviousSession()
+       ? $this->currentRequest->getSession()
+       : $session;
++    $this->obscurityPrefix = $obscurity_prefix;
+   }
+
+   /**
+@@ -101,7 +112,7 @@ public function serialize(EntityInterface $entity, array $includes = []) {
+       $query = ['include' => implode(',', $includes)];
+     }
+     $request = Request::create(
+-      $jsonapi_url,
++      '/' . ltrim($this->obscurityPrefix, '/') . $jsonapi_url,
+       'GET',
+       $query,
+       $this->currentRequest->cookies->all(),
