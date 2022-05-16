@@ -51,17 +51,17 @@ class JsonApiObscuritySubscriber implements EventSubscriberInterface {
    */
   protected function validatePrefix(Request $request): void {
     $this->obscurityPrefix = '/' . ltrim($this->obscurityPrefix, '/');
-    $path_prefix = strstr($request->getPathInfo(), $this->jsonApiBasePath, TRUE);
-    if ($path_prefix != $this->obscurityPrefix) {
-      // Check with potential langcode.
-      $langcode = substr($path_prefix, strrpos($path_prefix, '/') + 1);
-      if (
-        !array_key_exists($langcode, LanguageManager::getStandardLanguageList()) ||
-        $path_prefix != $this->obscurityPrefix . '/' . $langcode
-      ) {
-        throw new NotFoundHttpException();
-      }
+    $prefix = strstr($request->getPathInfo(), $this->jsonApiBasePath, TRUE);
+    if ($prefix == $this->obscurityPrefix) {
+      return;
     }
+    // Check with potential langcode.
+    $langcode = substr($prefix, strrpos($prefix, '/') + 1);
+    if (array_key_exists($langcode, LanguageManager::getStandardLanguageList()) &&
+      $prefix == $this->obscurityPrefix . '/' . $langcode) {
+      return;
+    }
+    throw new NotFoundHttpException();
   }
 
   /**
