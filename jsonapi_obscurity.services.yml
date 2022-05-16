@@ -1,0 +1,10 @@
+parameters:
+  jsonapi_obscurity.prefix: ''
+
+services:
+  jsonapi_obscurity_subscriber:
+    class: Drupal\jsonapi_obscurity\EventSubscriber\JsonApiObscuritySubscriber
+    tags:
+      - { name: event_subscriber }
+    arguments:
+      [ '%jsonapi.base_path%', '%jsonapi_obscurity.prefix%' ]

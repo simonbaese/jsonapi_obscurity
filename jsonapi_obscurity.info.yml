@@ -1,0 +1,7 @@
+name: JSON:API Obscurity
+description: Obscures JSON:API path as recommended in security considerations.
+package: Web services
+type: module
+core_version_requirement: ^9 || ^10
+dependencies:
+  - drupal:jsonapi

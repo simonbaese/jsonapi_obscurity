@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Obscures JSON:API path as recommended in security considerations.
+ *
+ * @see https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/security-considerations
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function jsonapi_obscurity_requirements(string $phase): array {
+
+  if ($phase == 'runtime') {
+    $requirements['jsonapi_obscurity'] = [
+      'title' => t('JSON:API Obscurity'),
+      'value' => t('Obscurity prefix not defined!'),
+    ];
+    if (empty(\Drupal::getContainer()->getParameter('jsonapi_obscurity.prefix'))) {
+      $requirements['jsonapi_obscurity']['description'] = t('Please set the parameter %parameter in the file %file.', [
+        '%parameter' => 'jsonapi_obscurity.prefix',
+        '%file' => 'sites/default/services.yml',
+      ]);
+      $requirements['jsonapi_obscurity']['severity'] = REQUIREMENT_ERROR;
+    }
+  }
+
+  return $requirements ?? [];
+}
