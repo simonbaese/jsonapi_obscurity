@@ -40,13 +40,10 @@ class JsonApiObscuritySubscriber implements EventSubscriberInterface {
 
   /**
    * Decides whether obscurity prefix handling applies.
-   *
-   * Resolve the path and check whether it contains the JSON:API base path.
-   * Additionally, check if the obscurity prefix is non-empty.
    */
   protected function applies(Request $request): bool {
     return !empty($this->obscurityPrefix) &&
-      str_starts_with($this->getPlainPath($request), $this->jsonApiBasePath . '/');
+      str_contains($request->getPathInfo(), $this->jsonApiBasePath . '/');
   }
 
   /**
@@ -89,22 +86,6 @@ class JsonApiObscuritySubscriber implements EventSubscriberInterface {
    */
   protected function getBarePath(Request $request): string {
     return preg_replace('/^' . preg_quote($this->obscurityPrefix, '/') . '/', '', $request->getPathInfo()) ?? '';
-  }
-
-  /**
-   * Returns the path without the obscurity prefix and langcode.
-   */
-  protected function getPlainPath(Request $request): string {
-    $plain_path = $this->getBarePath($request);
-    $exploded_path = explode('/', ltrim($plain_path, '/'), 2);
-    if (
-      isset($exploded_path[0]) &&
-      isset($exploded_path[1]) &&
-      array_key_exists($exploded_path[0], LanguageManager::getStandardLanguageList())
-    ) {
-      $plain_path = '/' . $exploded_path[1];
-    }
-    return $plain_path;
   }
 
   /**
